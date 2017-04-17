@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>分页</title>
+	<script type="text/javascript" src="jquery-1.11.3.min.js"></script>
+</head>
+<body>
+<style type="text/css">
+	*{padding:0; margin:0;}
+	ul li{list-style: none}
+    #pageShow{width:700px; padding:10px; background-color:#ccc;
+              margin:200px auto 0;overflow:hidden;
+              border-radius:5px}
+    #pageShow button,#pageShow ul,#pageShow ul li{float:left;
+                     margin:0 5px;}
+    #pageShow button{height:30px;padding:0 5px;}
+    #pageShow ul li{width:30px; height:30px;  line-height: 30px;
+                  text-align: center; background-color:#fff;
+                   border-radius:5px;padding:0 3px;}
+    #pageShow button,#pageShow ul li{cursor:pointer;}
+    #pageShow ul li.selected{
+    	  color:#fff;
+    	  background-color:#000;
+    }             
+</style>
+
+<div id="pageShow"></div>
+
+
+<script type="text/javascript">
+
+
+   function PageShow(option){
+
+     var _opts={//设置基础选项
+     	 el:"#pageShow",
+     	 first:".pageShow_first",
+     	 last:".pageShow_last",
+     	 prev:".pageShow_prev",
+     	 next:".pageShow_next",
+     	 listShow:".pageShow_list",
+     	 maxLenth:100,
+     	 minLenth:1,
+     	 selectNumber:1
+     }
+
+     this.option=$.extend({},_opts,option)//加入默认选项
+
+     var _initHtml="<button class='pageShow_first' disabled>首页</button><button class='pageShow_prev' disabled>上一页</button><ul class='pageShow_list'><li data-page='1' class='selected'>1</li><li data-page='2'>2</li><li data-page='3'>3</li><li data-page='4'>4</li><li data-page='5'>5</li><li data-page='6'>6</li><li data-page='7'>7</li><li data-page='8'>8</li><li data-page='9'>9</li><li data-page='10'>10</li></ul><button class='pageShow_next'>下一页</button><button class='pageShow_last'>末页</button>"
+
+ 	         $(this.option.el).append(_initHtml)//初始化数据
+             
+             var _that=this;//默认this为类;
+             
+             var _init=function(){//更新HTML
+             	  var start=0;
+             	  var end=0;
+             	  var selectedPage=_that.option.selectNumber;
+             	  var max=_that.option.maxLenth;
+             	  var min=_that.option.minLenth;
+             	  var listHtml="";
+             	  if(selectedPage==max){//末页
+             	  	  end=max;
+             	  	  start=max-9
+             	  }else if(selectedPage==min){//首页
+                      start=min;
+                      end=start+9
+             	  }else{
+             	  	  start=selectedPage;
+             	  	  end=Math.min(selectedPage+9,max);
+             	  	  if(max-selectedPage<9){
+             	  	  	 start=max-9;
+             	  	  	 end=max;
+             	  	  }
+             	  }
+             	  for(;start<=end;start++){
+                      if(start==selectedPage){
+                      	 listHtml+="<li class='selected' data-page="+start+">"+start+"</li>"
+                      }else{
+                      	listHtml+="<li data-page="+start+">"+start+"</li>"
+                      } 
+             	  }
+             	  $(_that.option.listShow).html(listHtml);           
+             }
+            var _disabled=function(){
+            	  if(_that.option.selectNumber==_that
+            	  	.option.minLenth){
+            	  	$(_that.option.first).prop("disabled",true);
+                    $(_that.option.prev).prop("disabled",true);
+            	  }else{
+            	  	$(_that.option.first).prop("disabled",false);
+                    $(_that.option.prev).prop("disabled",false);
+            	  }
+
+            	  if(_that.option.selectNumber==_that
+            	  	.option.maxLenth){
+            	  	$(_that.option.last).prop("disabled",true);
+                    $(_that.option.next).prop("disabled",true);
+            	  }else{
+            	  	$(_that.option.last).prop("disabled",false);
+                    $(_that.option.next).prop("disabled",false);
+            	  }
+            }
+
+             $(this.option.first).on("click",function(){//首页事件
+                  $(_that.option.listShow+">li").first().addClass("selected").siblings().removeClass("selected");
+                  _that.option.selectNumber=_that.option.minLenth;
+                  _init();
+                  _disabled();
+                  console.log("当前页数 "+_that.option.selectNumber)
+             })
+
+             $(this.option.last).on("click",function(){//末页事件
+                  $(_that.option.listShow+">li").last().addClass("selected").siblings().removeClass("selected");
+                  _that.option.selectNumber=_that.option.maxLenth;
+                  _init();
+                  _disabled();
+                  console.log("当前页数 "+_that.option.selectNumber)
+             })
+
+              $(this.option.next).on("click",function(){//下一页事件
+                  var selt=$(_that.option.listShow +">li.selected")
+                  var page=selt.data("page");
+                     $(_that.option.listShow +">li.selected").removeClass("selected").next().addClass("selected")
+
+                  _that.option.selectNumber=page+1;
+                  _init();
+                  _disabled();
+                  console.log("当前页数 "+_that.option.selectNumber)
+                
+             })
+
+
+              $(this.option.prev).on("click",function(){//上一页事件
+                  var selt=$(_that.option.listShow +">li.selected")
+                  var page=selt.data("page");
+                  _that.option.selectNumber=page-1;
+                  _init();
+                  _disabled();
+                  console.log("当前页数 "+_that.option.selectNumber)
+             })
+ 
+            $(this.option.listShow).on("click","li",function(){
+             	  $(this).addClass("selected").siblings().removeClass("selected");
+                  var page=$(this).data("page");
+                  _that.option.selectNumber=page;
+                  _init();
+                  _disabled();
+                  console.log("当前页数 "+_that.option.selectNumber)
+             })
+
+            }
+
+   new PageShow()
+
+
+
+   
+</script>
+
+
+	
+</body>
+</html>
